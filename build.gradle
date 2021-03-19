@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+repositories {
+    mavenCentral()
+    maven{
+        url {
+            "https://repository.apache.org/content/repositories/releases/"
+        }
+    }
+}
+
+dependencies {
+    annotationProcessor 'org.projectlombok:lombok:1.18.18'
+    compileOnly 'org.projectlombok:lombok:1.18.18'
+    implementation 'org.apache.hadoop:hadoop-client:3.3.0'
+    implementation 'org.slf4j:slf4j-api:1.7.30'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation 'org.apache.mrunit:mrunit:1.0.0:hadoop2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'com.example.mr.LogsCounter'
+    }
+    archiveClassifier = "all"
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
