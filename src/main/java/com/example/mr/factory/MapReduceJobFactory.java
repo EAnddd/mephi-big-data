@@ -26,6 +26,7 @@ public class MapReduceJobFactory {
      * @param outputKey Output key class
      * @param outputValue Output value class
      * @return job configuration for created job
+     * Configure separator for output file as comma
      */
     public static Job createMapReduceJob(Class<? extends Mapper> mapper,
                                              Class<? extends Reducer> reducer,
@@ -35,7 +36,6 @@ public class MapReduceJobFactory {
 
         try {
             job = Job.getInstance();
-            // configure separator for output file
             job.getConfiguration().set("mapreduce.output.textoutputformat.separator", ",");
         } catch(IOException e) {
             log.error("Can't create job for mapper {}, reducer {}, outputKey {} and value {}", mapper, reducer, outputKey, outputValue);

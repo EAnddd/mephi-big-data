@@ -9,6 +9,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+/**
+ * Custome type class for mapper and reducer
+ */
 @Data
 @EqualsAndHashCode
 public class SyslogDateWritable implements WritableComparable<SyslogDateWritable> {
