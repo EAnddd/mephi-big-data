@@ -46,7 +46,7 @@ public class LogTypeMapper extends Mapper<LongWritable, Text, SyslogDateWritable
         while (matcher.find()) {
             result.setSeverityWithDate(matcher.group(2).substring(0, 13)
                     + " "
-                    + Severity.get(Integer.parseInt(matcher.group(1)) % 8).name());
+                    + Integer.parseInt(matcher.group(1)) % 8);
         }
         try {
             if (result.getSeverityWithDate() != null) {

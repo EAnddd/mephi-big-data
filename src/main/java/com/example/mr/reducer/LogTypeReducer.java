@@ -23,10 +23,12 @@ public class LogTypeReducer extends Reducer<SyslogDateWritable, IntWritable, Sys
             sum += value.get();
         }
         try {
-            context.write(key, new IntWritable(sum));
+
+            context.write(key.prettify(), new IntWritable(sum));
         } catch (IOException | InterruptedException e) {
             log.error("Can't reduce for key {}", key);
         }
 
     }
+
 }

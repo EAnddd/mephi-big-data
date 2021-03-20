@@ -1,5 +1,6 @@
 package com.example.mr.data;
 
+import com.example.mr.mapper.Severity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
@@ -17,14 +18,21 @@ import java.io.IOException;
 public class SyslogDateWritable implements WritableComparable<SyslogDateWritable> {
     private String severityWithDate;
 
-    public SyslogDateWritable(){}
+    public SyslogDateWritable() {
+    }
 
-    public SyslogDateWritable(String severityWithDate){
+    public SyslogDateWritable(String severityWithDate) {
         this.severityWithDate = severityWithDate;
     }
+
     @Override
     public void write(DataOutput out) throws IOException {
         out.writeBytes(severityWithDate);
+    }
+
+    public SyslogDateWritable prettify() {
+        String[] keys = this.getSeverityWithDate().split(" ");
+        return new SyslogDateWritable(keys[0] + " " + Severity.get(Integer.parseInt(keys[1])).name());
     }
 
     @Override

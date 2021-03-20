@@ -28,7 +28,7 @@ public class LogTypeMapperTest {
     @Test
     public void testMapperCustomType() throws IOException {
         mapDriver.withInput(new LongWritable(), new Text(normalString))
-                .withOutput(new SyslogDateWritable("2021-03-18T21 Debug"), new IntWritable(1))
+                .withOutput(new SyslogDateWritable("2021-03-18T21 7"), new IntWritable(1))
                 .runTest();
     }
 
