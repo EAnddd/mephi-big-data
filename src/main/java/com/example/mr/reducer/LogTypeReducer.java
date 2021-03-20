@@ -4,7 +4,6 @@ package com.example.mr.reducer;
 import com.example.mr.data.SyslogDateWritable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;

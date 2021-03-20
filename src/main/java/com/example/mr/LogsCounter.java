@@ -27,7 +27,7 @@ public class LogsCounter {
         if(args.length < 2){
             throw new RuntimeException("No input and output directories, please provide two arguments!");
         }
-        SyslogDataUtil.prerareData(args[0], args[1], 1000);
+        SyslogDataUtil.prerareData(args[0], args[1], Integer.parseInt(args[2]));
 
         Path input = new Path(args[0]);
         Path outputDir = new Path(args[1]);

@@ -45,7 +45,7 @@ public class MapReduceJobFactory {
         job.setMapperClass(LogTypeMapper.class);
         job.setReducerClass(LogTypeReducer.class);
         // set combiner to pre-aggregate results on mapper side
-//        job.setCombinerClass(LogTypeReducer.class);
+        job.setCombinerClass(LogTypeReducer.class);
         job.setJarByClass(LogsCounter.class);
         job.setOutputKeyClass(SyslogDateWritable.class);
         job.setOutputValueClass(IntWritable.class);
