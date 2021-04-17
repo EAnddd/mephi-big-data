@@ -17,21 +17,27 @@ public class WeatherAggregator {
      */
     @SneakyThrows
     public static void main(String[] args) {
+        String pathToSave = "here";
+        int quantity = 1000;
 
+        if(args.length == 2 ){
+            pathToSave = args[0];
+            quantity = Integer.parseInt(args[1]);
+        }
         MessageService kafkaService = new KafkaService();
         kafkaService.connect();
         DataPreparer dataPreparer = new KafkaWeatherMessageFormer(kafkaService);
-        dataPreparer.prepareData(1000);
+        dataPreparer.prepareData(quantity);
         dataPreparer.clean();
 
         Aggregator aggregator;
-        if(args.length == 0) {
+        if(args.length < 3) {
             log.info("______SIMPLE________");
             aggregator = new WeatherDataAggregatorRDD(kafkaService);
         } else {
             log.info("______STREAM________");
             aggregator = new StreamingWeatherDataAggregator();
         }
-        aggregator.aggregate();
+        aggregator.aggregate(pathToSave);
     }
 }

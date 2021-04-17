@@ -28,7 +28,7 @@ public class WeatherDataAggregatorRDDTest {
         successResult.add("2021-04-15T19:07:39.321, area4, sensor462_pres, 781");
         when(kafkaService.readData()).thenReturn(successResult);
 
-        aggregatorRDD.aggregate();
+        aggregatorRDD.aggregate("here");
         Assertions.assertEquals(1, dataSaver.savedResults.size());
         Assertions.assertEquals("2021-04-15T19:00:00.000 area4 pres 781.0", dataSaver.savedResults.get(0));
     }
@@ -41,7 +41,7 @@ public class WeatherDataAggregatorRDDTest {
         successResult.add("2021-04-19T19:07:39.321, area4, sensor462_pres, 781");
         when(kafkaService.readData()).thenReturn(successResult);
 
-        aggregatorRDD.aggregate();
+        aggregatorRDD.aggregate("here");
         Assertions.assertEquals(2, dataSaver.savedResults.size());
     }
 
@@ -49,7 +49,7 @@ public class WeatherDataAggregatorRDDTest {
     public void shouldNotAggregateBecauseOfWrongData() {
         strangeResult.add("wrong data");
         when(kafkaService.readData()).thenReturn(strangeResult);
-        aggregatorRDD.aggregate();
+        aggregatorRDD.aggregate("here");
         Assertions.assertEquals(0, dataSaver.savedResults.size());
     }
 

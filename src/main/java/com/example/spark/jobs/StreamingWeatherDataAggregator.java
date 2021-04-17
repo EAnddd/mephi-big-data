@@ -45,7 +45,7 @@ public class StreamingWeatherDataAggregator implements Aggregator {
      */
     @SneakyThrows
     @Override
-    public void aggregate() {
+    public void aggregate(String path) {
         Map<String, Object> props = new HashMap<>();
         props.put("bootstrap.servers", "0.0.0.0:9092");
         props.put("key.deserializer", StringDeserializer.class);
@@ -71,7 +71,7 @@ public class StreamingWeatherDataAggregator implements Aggregator {
                 })
                 .mapValues(value -> new Tuple2<>(Float.parseFloat(value),1))
                 .reduceByKey((tuple1,tuple2) ->  new Tuple2<>(tuple1._1 + tuple2._1, tuple1._2 + tuple2._2))
-                .foreachRDD(a -> saver.save(a, "here"));
+                .foreachRDD(a -> saver.save(a, path));
 
         sc.start();
         sc.awaitTermination();

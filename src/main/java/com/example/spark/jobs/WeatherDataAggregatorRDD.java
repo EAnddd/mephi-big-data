@@ -51,7 +51,7 @@ public class WeatherDataAggregatorRDD implements Aggregator {
      * For saving data to filesystem DataSaver util class is used.
      */
     @Override
-    public void aggregate() {
+    public void aggregate(String path) {
         JavaPairRDD result = JavaSparkContext.fromSparkContext(sc).parallelize(prepareData())
                 .filter(record -> record.matches(".*, area\\d, sensor\\d{3}_.*, \\d{0,3}"))
                 .mapToPair(record -> {
@@ -61,7 +61,7 @@ public class WeatherDataAggregatorRDD implements Aggregator {
                 .mapValues(value -> new Tuple2<>(Float.parseFloat(value),1))
                 .reduceByKey((tuple1,tuple2) ->  new Tuple2<>(tuple1._1 + tuple2._1, tuple1._2 + tuple2._2))
                 .mapValues(data -> data._1()/ data._2() );
-        saver.save(result, "here");
+        saver.save(result, path);
 //                .foreach(data -> System.out.println("Key="+data._1() + " Average=" + data._2()._1/data._2()._2));
     }
 
