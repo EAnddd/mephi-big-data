@@ -3,6 +3,7 @@ package com.example.spark.jobs;
 import com.example.spark.services.DataSaverLocalStub;
 import com.example.spark.services.KafkaService;
 import com.example.spark.services.MessageService;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -14,10 +15,10 @@ import static org.mockito.Mockito.when;
 
 public class WeatherDataAggregatorRDDTest {
 
-    MessageService kafkaService = Mockito.mock(KafkaService.class);
-    DataSaverLocalStub dataSaver = new DataSaverLocalStub();
+    static MessageService kafkaService = Mockito.mock(KafkaService.class);
+    static DataSaverLocalStub dataSaver = new DataSaverLocalStub();
 
-    WeatherDataAggregatorRDD aggregatorRDD = new WeatherDataAggregatorRDD(kafkaService, dataSaver);
+    static WeatherDataAggregatorRDD aggregatorRDD = new WeatherDataAggregatorRDD(kafkaService, dataSaver);
     List<String> successResult = new ArrayList<>();
     List<String> strangeResult = new ArrayList<>();
 
@@ -51,6 +52,10 @@ public class WeatherDataAggregatorRDDTest {
         when(kafkaService.readData()).thenReturn(strangeResult);
         aggregatorRDD.aggregate("here");
         Assertions.assertEquals(0, dataSaver.savedResults.size());
+    }
+    @AfterAll
+    public static void close(){
+        aggregatorRDD.sc.stop();
     }
 
 }

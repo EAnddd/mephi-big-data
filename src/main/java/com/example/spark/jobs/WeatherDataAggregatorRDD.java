@@ -22,7 +22,7 @@ public class WeatherDataAggregatorRDD implements Aggregator {
 
     private final MessageService consumer;
     private DataSaver saver = new DataSaver();
-    private final SparkContext sc;
+    final SparkContext sc;
 
     /**
      * @param consumer Consumer to get data from.

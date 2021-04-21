@@ -27,7 +27,8 @@ import java.util.*;
 @Slf4j
 public class StreamingWeatherDataAggregator implements Aggregator {
     private final DataSaver saver = new DataSaver();
-    private final JavaStreamingContext sc;
+    final JavaStreamingContext sc;
+    private String kafkaServer = "kafka:9092";
 
     private static final String TOPIC_NAME = "mybesttopic";
 
@@ -45,6 +46,25 @@ public class StreamingWeatherDataAggregator implements Aggregator {
     }
 
     /**
+     * @param cassHost cassandra custom hostname
+     * @param username username to connect to cassandra
+     * @param password password to connect to cassandra
+     * @param master spark master (to start locally - "local", on cluster - mostly "yarn")
+     * @param kafkaServer kafka server host and port value
+     * @param port cassandra port value
+     */
+    public StreamingWeatherDataAggregator(String cassHost, String username, String password, String master, String kafkaServer, String port){
+        SparkConf sparkConf = new SparkConf()
+                .set("spark.cassandra.connection.port", port)
+                .set("spark.cassandra.connection.host", cassHost)
+                .set("spark.cassandra.auth.username", username)
+                .set("spark.cassandra.auth.password", password)
+                .setAppName("Example Spark App")
+                .setMaster(master);
+        this.kafkaServer = kafkaServer;
+        sc = new JavaStreamingContext(sparkConf, Durations.seconds(1));
+    }
+    /**
      * Implementation of Aggregator interface aggregate method.
      * This method uses Spark Streaming framework to infinitely read data from source.
      * Source is Apache Kafka - here kafka properties are locally initializes to get initial connection.
@@ -54,7 +74,7 @@ public class StreamingWeatherDataAggregator implements Aggregator {
     @Override
     public void aggregate(String path) {
         Map<String, Object> props = new HashMap<>();
-        props.put("bootstrap.servers", "kafka:9092");
+        props.put("bootstrap.servers", kafkaServer);
         props.put("key.deserializer", StringDeserializer.class);
         props.put("value.deserializer", StringDeserializer.class);
         props.put("group.id", "mybestconsumer");
@@ -82,6 +102,7 @@ public class StreamingWeatherDataAggregator implements Aggregator {
                 .reduceByKey((tuple1,tuple2) ->  new Tuple2<>(tuple1._1 + tuple2._1, tuple1._2 + tuple2._2))
                 .foreachRDD(rdd -> rdd.foreach(tuple ->
                         {
+                            log.info("AAAA");
                             CqlSession session = connector.openSession();
                             session.execute(String.format("INSERT INTO my_best_keyspace.weather_results(id, key, value) VALUES(%s, '%s', %f);",
                                     UUID.randomUUID(), tuple._1, tuple._2._1 / tuple._2._2));
@@ -89,7 +110,8 @@ public class StreamingWeatherDataAggregator implements Aggregator {
                 ));
 
         sc.start();
-        sc.awaitTermination();
+        sc.awaitTerminationOrTimeout(10000);
+
     }
 
 }

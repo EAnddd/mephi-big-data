@@ -41,6 +41,7 @@ dependencies {
     testImplementation 'org.apache.mrunit:mrunit:1.0.0:hadoop2'
     testImplementation 'org.testcontainers:kafka:1.15.0'
     testImplementation 'com.holdenkarau:spark-testing-base_2.12:2.4.0_0.14.0'
+    testImplementation 'org.testcontainers:cassandra:1.15.2'
 }
 
 test {
