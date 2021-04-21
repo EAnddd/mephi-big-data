@@ -30,7 +30,7 @@ public class WeatherDataAggregatorRDDTest {
 
         aggregatorRDD.aggregate("here");
         Assertions.assertEquals(1, dataSaver.savedResults.size());
-        Assertions.assertEquals("2021-04-15T19:00:00.000 area4 pres 781.0", dataSaver.savedResults.get(0));
+        Assertions.assertEquals("2021-04-15T19:00:00.000 area4 pres", dataSaver.savedResults.get(0).getKey());
     }
 
     @Test

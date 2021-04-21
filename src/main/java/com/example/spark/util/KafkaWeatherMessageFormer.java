@@ -33,7 +33,6 @@ public class KafkaWeatherMessageFormer implements DataPreparer {
 
     @Override
     public void prepareData() {
-//        prepareAndSend();
         executorService.scheduleWithFixedDelay(this::send, 1, 3, TimeUnit.SECONDS);
     }
 
@@ -43,11 +42,8 @@ public class KafkaWeatherMessageFormer implements DataPreparer {
         }
     }
     public void prepareAndSend(){
-//        for (int i = 0; i < lineQuantity; i++) {
             log.info("Send {}", createMessage());
             producer.sendData(createMessage());
-
-//        }
     }
     /**
      * @return Method to create weather data message.

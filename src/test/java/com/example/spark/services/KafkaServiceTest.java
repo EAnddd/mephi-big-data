@@ -24,16 +24,11 @@ public class KafkaServiceTest {
     }
 
     @Test
-    public void shouldSendOneMessage() {
-        kafkaService.sendData("Test data my data");
-        kafkaService.getProducer().flush();
-        Assertions.assertEquals("Test data my data", kafkaService.readData().get(0));
-    }
-
-    @Test
-    public void shouldSendMultipleMessages() {
+    public void shouldSendMultipleMessages() throws InterruptedException {
         kafkaWeatherMessageFormer.prepareData();
         kafkaService.getProducer().flush();
+        Thread.sleep(3000);
+        kafkaService.getProducer().close();
         Assertions.assertEquals(10, kafkaService.readData().size());
     }
 
