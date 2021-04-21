@@ -102,7 +102,6 @@ public class StreamingWeatherDataAggregator implements Aggregator {
                 .reduceByKey((tuple1,tuple2) ->  new Tuple2<>(tuple1._1 + tuple2._1, tuple1._2 + tuple2._2))
                 .foreachRDD(rdd -> rdd.foreach(tuple ->
                         {
-                            log.info("AAAA");
                             CqlSession session = connector.openSession();
                             session.execute(String.format("INSERT INTO my_best_keyspace.weather_results(id, key, value) VALUES(%s, '%s', %f);",
                                     UUID.randomUUID(), tuple._1, tuple._2._1 / tuple._2._2));
