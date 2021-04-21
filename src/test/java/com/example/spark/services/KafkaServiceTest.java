@@ -20,7 +20,7 @@ public class KafkaServiceTest {
         kafka.start();
         kafkaService = new KafkaService(kafka.getBootstrapServers(), 1);
         kafkaService.connect();
-        kafkaWeatherMessageFormer = new KafkaWeatherMessageFormer(kafkaService);
+        kafkaWeatherMessageFormer = new KafkaWeatherMessageFormer(kafkaService, 10);
     }
 
     @Test
@@ -32,7 +32,7 @@ public class KafkaServiceTest {
 
     @Test
     public void shouldSendMultipleMessages() {
-        kafkaWeatherMessageFormer.prepareData(10);
+        kafkaWeatherMessageFormer.prepareData();
         kafkaService.getProducer().flush();
         Assertions.assertEquals(10, kafkaService.readData().size());
     }

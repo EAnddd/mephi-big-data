@@ -26,9 +26,8 @@ public class WeatherAggregator {
         }
         MessageService kafkaService = new KafkaService();
         kafkaService.connect();
-        DataPreparer dataPreparer = new KafkaWeatherMessageFormer(kafkaService);
-        dataPreparer.prepareData(quantity);
-        dataPreparer.clean();
+        DataPreparer dataPreparer = new KafkaWeatherMessageFormer(kafkaService, quantity);
+        dataPreparer.prepareData();
 
         Aggregator aggregator;
         if(args.length < 3) {

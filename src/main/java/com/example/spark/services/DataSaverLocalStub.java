@@ -1,6 +1,7 @@
 package com.example.spark.services;
 
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +16,8 @@ public class DataSaverLocalStub extends DataSaver {
      * @param path Directory name where to save result files.
      */
     @Override
-    public void save(JavaPairRDD javaPairRDD, String path){
-        savedResults = ((JavaPairRDD<String, Float>)javaPairRDD).map(data -> data._1() + " " + data._2()).collect();
+    public void save(JavaRDD javaPairRDD, String path){
+        savedResults = ((JavaRDD<String>)javaPairRDD).collect();
 //        ((JavaPairRDD<String, Float>)javaPairRDD).foreach(data -> savedResults.add(1, ""));
     }
 }

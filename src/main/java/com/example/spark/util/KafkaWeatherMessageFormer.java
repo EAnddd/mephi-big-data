@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.*;
 
 @Slf4j
 public class KafkaWeatherMessageFormer implements DataPreparer {
@@ -13,7 +14,9 @@ public class KafkaWeatherMessageFormer implements DataPreparer {
     private static Map<String, Integer> typesWithMaxValues = new HashMap<>();
     private static List<String> types = new ArrayList<>();
     private final MessageService producer;
-
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private int lineQuantity = 1000;
+    private final Executor fixedThreadPool = Executors.newFixedThreadPool(4);
     static {
         types.add("temp");
         types.add("hum");
@@ -23,21 +26,29 @@ public class KafkaWeatherMessageFormer implements DataPreparer {
         typesWithMaxValues.put("pres", 800);
     }
 
-    public KafkaWeatherMessageFormer(MessageService producer){
+    public KafkaWeatherMessageFormer(MessageService producer, int lineQuantity){
         this.producer = producer;
+        this.lineQuantity = lineQuantity;
     }
 
-    /**
-     * @param lineQuantity The quantity of lines wanted to be generated and sent with message producer.
-     */
     @Override
-    public void prepareData(int lineQuantity) {
+    public void prepareData() {
+//        prepareAndSend();
+        executorService.scheduleWithFixedDelay(this::send, 1, 3, TimeUnit.SECONDS);
+    }
+
+    private void send(){
         for (int i = 0; i < lineQuantity; i++) {
-            log.info("Send {}", createMessage());
-            producer.sendData(createMessage());
+            CompletableFuture.runAsync(this::prepareAndSend, fixedThreadPool);
         }
     }
+    public void prepareAndSend(){
+//        for (int i = 0; i < lineQuantity; i++) {
+            log.info("Send {}", createMessage());
+            producer.sendData(createMessage());
 
+//        }
+    }
     /**
      * @return Method to create weather data message.
      * Example: 2021-04-15T19:07:39.321, area4, sensor462_pres, 782

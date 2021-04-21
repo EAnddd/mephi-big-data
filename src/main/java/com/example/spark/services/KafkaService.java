@@ -68,6 +68,7 @@ public class KafkaService implements MessageService {
      */
     public void sendData(Object data) {
         producer.send(new ProducerRecord<>(TOPIC, "id", (String)data));
+        producer.flush();
     }
 
     /**

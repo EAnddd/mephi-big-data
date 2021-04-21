@@ -1,8 +1,11 @@
 package com.example.spark.jobs;
 
 
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.spark.connector.cql.CassandraConnector;
 import com.example.spark.services.DataSaver;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.spark.SparkConf;
@@ -21,6 +24,7 @@ import java.util.*;
 /**
  * Spark streaming aggregation class
  */
+@Slf4j
 public class StreamingWeatherDataAggregator implements Aggregator {
     private final DataSaver saver = new DataSaver();
     private final JavaStreamingContext sc;
@@ -32,8 +36,11 @@ public class StreamingWeatherDataAggregator implements Aggregator {
      */
     public StreamingWeatherDataAggregator(){
         SparkConf sparkConf = new SparkConf()
+                .set("spark.cassandra.connection.host", "cassandra")
+                .set("spark.cassandra.auth.username", "cassandra")
+                .set("spark.cassandra.auth.password", "cassandra")
                 .setAppName("Example Spark App")
-                .setMaster("local");
+                .setMaster("yarn");
         sc = new JavaStreamingContext(sparkConf, Durations.seconds(1));
     }
 
@@ -47,7 +54,7 @@ public class StreamingWeatherDataAggregator implements Aggregator {
     @Override
     public void aggregate(String path) {
         Map<String, Object> props = new HashMap<>();
-        props.put("bootstrap.servers", "0.0.0.0:9092");
+        props.put("bootstrap.servers", "kafka:9092");
         props.put("key.deserializer", StringDeserializer.class);
         props.put("value.deserializer", StringDeserializer.class);
         props.put("group.id", "mybestconsumer");
@@ -64,6 +71,8 @@ public class StreamingWeatherDataAggregator implements Aggregator {
                 ConsumerStrategies.Subscribe(topicsSet, props));
         JavaDStream<String> lines = messages.map(ConsumerRecord::value);
 
+        CassandraConnector connector = CassandraConnector.apply(sc.sparkContext().getConf());
+
         lines.filter(record -> record.matches(".*, area\\d, sensor\\d{3}_.*, \\d{0,3}"))
                 .mapToPair(record -> {
                     String[] recorsArr = record.split(" ");
@@ -71,7 +80,13 @@ public class StreamingWeatherDataAggregator implements Aggregator {
                 })
                 .mapValues(value -> new Tuple2<>(Float.parseFloat(value),1))
                 .reduceByKey((tuple1,tuple2) ->  new Tuple2<>(tuple1._1 + tuple2._1, tuple1._2 + tuple2._2))
-                .foreachRDD(a -> saver.save(a, path));
+                .foreachRDD(rdd -> rdd.foreach(tuple ->
+                        {
+                            CqlSession session = connector.openSession();
+                            session.execute(String.format("INSERT INTO my_best_keyspace.weather_results(id, key, value) VALUES(%s, '%s', %f);",
+                                    UUID.randomUUID(), tuple._1, tuple._2._1 / tuple._2._2));
+                        }
+                ));
 
         sc.start();
         sc.awaitTermination();
